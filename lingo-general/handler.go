@@ -136,8 +136,16 @@ func HandleGeneral(req *ipod.Command, tr ipod.CommandWriter, dev DeviceGeneral) 
 	case *IdentifyDeviceLingoes:
 		ipod.Respond(req, tr, ackSuccess(req))
 		if msg.DeviceID != 0x00 {
+			// TODO: These two lines below this comment may need to be moved into the option bits if we want to
+			// support authentication options. Currently, only immediate is supported, which is what
+			// we assume. This is the case where msg.Options bits are set to 0x02.
+
 			//ipod.Send(tr, &GetDevAuthenticationInfo{})
 			ipod.Respond(req, tr, &GetDevAuthenticationInfo{})
+
+			// TODO: Consider implementing authentication options if needed for your use.
+			// For options bits set to binary 10, (0x02 hex), authenticate immidiately (do what current code does).
+			// if msg.Options == 0x02 { // Authenticate as normal. Else, postpone auth
 		}
 
 	//GetDevAuthenticationInfo
