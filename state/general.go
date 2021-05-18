@@ -1,4 +1,4 @@
-package main
+package state
 
 import (
 	"bytes"
@@ -12,34 +12,34 @@ import (
 	"github.com/fullsailor/pkcs7"
 )
 
-type DevGeneral struct {
+type devGeneral struct {
 	uimode general.UIMode
 	tokens []general.FIDTokenValue
 }
 
-var _ general.DeviceGeneral = &DevGeneral{}
+var _ general.DeviceGeneral = &devGeneral{}
 
-func (d *DevGeneral) UIMode() general.UIMode {
+func (d *devGeneral) UIMode() general.UIMode {
 	return d.uimode
 }
 
-func (d *DevGeneral) SetUIMode(mode general.UIMode) {
+func (d *devGeneral) SetUIMode(mode general.UIMode) {
 	d.uimode = mode
 }
 
-func (d *DevGeneral) Name() string {
+func (d *devGeneral) Name() string {
 	return "ipod-gadget"
 }
 
-func (d *DevGeneral) SoftwareVersion() (major uint8, minor uint8, rev uint8) {
+func (d *devGeneral) SoftwareVersion() (major uint8, minor uint8, rev uint8) {
 	return 7, 1, 2
 }
 
-func (d *DevGeneral) SerialNum() string {
+func (d *devGeneral) SerialNum() string {
 	return "abcd1234"
 }
 
-func (d *DevGeneral) LingoProtocolVersion(lingo uint8) (major uint8, minor uint8) {
+func (d *devGeneral) LingoProtocolVersion(lingo uint8) (major uint8, minor uint8) {
 	switch lingo {
 	case ipod.LingoGeneralID:
 		return 1, 9
@@ -54,7 +54,7 @@ func (d *DevGeneral) LingoProtocolVersion(lingo uint8) (major uint8, minor uint8
 	}
 }
 
-func (d *DevGeneral) LingoOptions(lingo uint8) uint64 {
+func (d *devGeneral) LingoOptions(lingo uint8) uint64 {
 	switch lingo {
 	case ipod.LingoGeneralID:
 		return 0x000000063DEF73FF
@@ -64,43 +64,43 @@ func (d *DevGeneral) LingoOptions(lingo uint8) uint64 {
 	}
 }
 
-func (d *DevGeneral) PrefSettingID(classID uint8) uint8 {
+func (d *devGeneral) PrefSettingID(classID uint8) uint8 {
 	return 0
 }
 
-func (d *DevGeneral) SetPrefSettingID(classID uint8, settingID uint8, restoreOnExit bool) {
+func (d *devGeneral) SetPrefSettingID(classID uint8, settingID uint8, restoreOnExit bool) {
 }
 
-func (d *DevGeneral) SetEventNotificationMask(mask uint64) {
+func (d *devGeneral) SetEventNotificationMask(mask uint64) {
 
 }
 
-func (d *DevGeneral) EventNotificationMask() uint64 {
+func (d *devGeneral) EventNotificationMask() uint64 {
 	return 0
 }
 
-func (d *DevGeneral) SupportedEventNotificationMask() uint64 {
+func (d *devGeneral) SupportedEventNotificationMask() uint64 {
 	return 0
 }
 
-func (d *DevGeneral) CancelCommand(lingo uint8, cmd uint16, transaction uint16) {
+func (d *devGeneral) CancelCommand(lingo uint8, cmd uint16, transaction uint16) {
 
 }
 
-func (d *DevGeneral) MaxPayload() uint16 {
+func (d *devGeneral) MaxPayload() uint16 {
 	return 65535
 }
 
-func (d *DevGeneral) StartIDPS() {
+func (d *devGeneral) StartIDPS() {
 	d.tokens = make([]general.FIDTokenValue, 0)
 }
 
-func (d *DevGeneral) SetToken(token general.FIDTokenValue) error {
+func (d *devGeneral) SetToken(token general.FIDTokenValue) error {
 	d.tokens = append(d.tokens, token)
 	return nil
 }
 
-func (d *DevGeneral) EndIDPS(status general.AccEndIDPSStatus) {
+func (d *devGeneral) EndIDPS(status general.AccEndIDPSStatus) {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "Tokens:\n")
 	for _, token := range d.tokens {
@@ -138,7 +138,7 @@ func (d *DevGeneral) EndIDPS(status general.AccEndIDPSStatus) {
 	log.Print(buf.String())
 }
 
-func (d *DevGeneral) AccAuthCert(cert []byte) {
+func (d *devGeneral) AccAuthCert(cert []byte) {
 	pkcs, err := pkcs7.Parse(cert)
 	if err != nil {
 		log.Error(err)

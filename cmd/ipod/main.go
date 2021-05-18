@@ -19,10 +19,15 @@ import (
 	extremote "github.com/oandrew/ipod/lingo-extremote"
 	general "github.com/oandrew/ipod/lingo-general"
 	_ "github.com/oandrew/ipod/lingo-simpleremote"
+	"github.com/oandrew/ipod/state"
 	"github.com/oandrew/ipod/trace"
 )
 
 var log = logrus.StandardLogger()
+
+func init() {
+	state.SetLogger(log)
+}
 
 func openDevice(path string) (*os.File, error) {
 	f, err := os.OpenFile(path, os.O_RDWR, os.ModePerm)
@@ -383,7 +388,7 @@ func processFrames(frameTransport ipod.FrameReadWriter) {
 	log.Warnf("EOF")
 }
 
-var devGeneral = &DevGeneral{}
+var ipodState = &state.IpodState{}
 
 func handlePacket(cmdWriter ipod.CommandWriter, cmd *ipod.Command) {
 	switch cmd.ID.LingoID() {
@@ -393,7 +398,7 @@ func handlePacket(cmdWriter ipod.CommandWriter, cmd *ipod.Command) {
 				audio.Start(cmdWriter)
 			}
 		}
-		general.HandleGeneral(cmd, cmdWriter, devGeneral)
+		general.HandleGeneral(cmd, cmdWriter, ipodState)
 
 	case ipod.LingoSimpleRemoteID:
 		//todo
