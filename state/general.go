@@ -17,18 +17,12 @@ type devGeneral struct {
 	tokens []general.FIDTokenValue
 }
 
-var _ general.DeviceGeneral = &devGeneral{}
-
 func (d *devGeneral) UIMode() general.UIMode {
 	return d.uimode
 }
 
 func (d *devGeneral) SetUIMode(mode general.UIMode) {
 	d.uimode = mode
-}
-
-func (d *devGeneral) Name() string {
-	return "ipod-gadget"
 }
 
 func (d *devGeneral) SoftwareVersion() (major uint8, minor uint8, rev uint8) {
