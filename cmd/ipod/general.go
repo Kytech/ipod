@@ -62,6 +62,9 @@ func (d *DevGeneral) LingoOptions(lingo uint8) uint64 {
 	default:
 		return 0
 	}
+
+	// TODO: Add section for extremote options in case this is preventing
+	// track meta from being fully sent.
 }
 
 func (d *DevGeneral) PrefSettingID(classID uint8) uint8 {
