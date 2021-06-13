@@ -44,10 +44,22 @@ func (ps *playbackState) PlaybackStatus() (trackLength, trackPos uint32, state e
 	return ps.trackLength, ps.trackPosition, ps.playerState
 }
 
+func (ps *playbackState) SetPlayerState(pState extremote.PlayerState) {
+	ps.pbStateMux.Lock()
+	defer ps.pbStateMux.Unlock()
+	ps.playerState = pState
+}
+
 func (ps *playbackState) ChapterName() string {
 	ps.chNameMux.RLock()
 	defer ps.chNameMux.RUnlock()
 	return ps.chapterName
+}
+
+func (ps *playbackState) SetChapterName(chName string) {
+	ps.chNameMux.Lock()
+	defer ps.chNameMux.Unlock()
+	ps.chapterName = chName
 }
 
 func (ps *playbackState) TrackTitle() string {
@@ -56,10 +68,22 @@ func (ps *playbackState) TrackTitle() string {
 	return ps.trackTitle
 }
 
+func (ps *playbackState) SetTrackTitle(trTitle string) {
+	ps.trTitleMux.Lock()
+	defer ps.trTitleMux.Unlock()
+	ps.trackTitle = trTitle
+}
+
 func (ps *playbackState) TrackArtist() string {
 	ps.trArtistMux.RLock()
 	defer ps.trArtistMux.RUnlock()
 	return ps.artistName
+}
+
+func (ps *playbackState) SetTrackArtist(trArtist string) {
+	ps.trArtistMux.Lock()
+	defer ps.trArtistMux.Unlock()
+	ps.artistName = trArtist
 }
 
 func (ps *playbackState) TrackAlbum() string {
@@ -68,14 +92,32 @@ func (ps *playbackState) TrackAlbum() string {
 	return ps.albumName
 }
 
+func (ps *playbackState) SetTrackAlbum(trAlbum string) {
+	ps.trAlbumMux.Lock()
+	defer ps.trAlbumMux.Unlock()
+	ps.albumName = trAlbum
+}
+
 func (ps *playbackState) ShuffleMode() extremote.ShuffleMode {
 	ps.shModeMux.RLock()
 	defer ps.shModeMux.RUnlock()
 	return ps.shuffleMode
 }
 
+func (ps *playbackState) SetShuffleMode(shMode extremote.ShuffleMode) {
+	ps.shModeMux.Lock()
+	defer ps.shModeMux.Unlock()
+	ps.shuffleMode = shMode
+}
+
 func (ps *playbackState) RepeatMode() extremote.RepeatMode {
 	ps.rptModeMux.RLock()
 	defer ps.rptModeMux.RUnlock()
 	return ps.repeatMode
+}
+
+func (ps *playbackState) SetRepeatMode(rptMode extremote.RepeatMode) {
+	ps.rptModeMux.Lock()
+	defer ps.rptModeMux.Unlock()
+	ps.repeatMode = rptMode
 }
