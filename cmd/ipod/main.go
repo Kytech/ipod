@@ -406,7 +406,7 @@ func handlePacket(cmdWriter ipod.CommandWriter, cmd *ipod.Command) {
 	case ipod.LingoDisplayRemoteID:
 		dispremote.HandleDispRemote(cmd, cmdWriter, nil)
 	case ipod.LingoExtRemoteID:
-		extremote.HandleExtRemote(cmd, cmdWriter, nil)
+		extremote.HandleExtRemote(cmd, cmdWriter, ipodState)
 	case ipod.LingoDigitalAudioID:
 		audio.HandleAudio(cmd, cmdWriter, nil)
 	}

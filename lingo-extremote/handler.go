@@ -6,6 +6,12 @@ import (
 
 type DeviceExtRemote interface {
 	PlaybackStatus() (trackLength, trackPos uint32, state PlayerState)
+	ChapterName() string
+	TrackTitle() string
+	TrackArtist() string
+	TrackAlbum() string
+	ShuffleMode() ShuffleMode
+	RepeatMode() RepeatMode
 }
 
 func ackSuccess(req *ipod.Command) *ACK {
@@ -34,7 +40,7 @@ func HandleExtRemote(req *ipod.Command, tr ipod.CommandWriter, dev DeviceExtRemo
 		})
 	case *GetCurrentPlayingTrackChapterName:
 		ipod.Respond(req, tr, &ReturnCurrentPlayingTrackChapterName{
-			ChapterName: ipod.StringToBytes("chapter"),
+			ChapterName: ipod.StringToBytes(dev.ChapterName()),
 		})
 	case *GetAudiobookSpeed:
 		ipod.Respond(req, tr, &ReturnAudiobookSpeed{
@@ -85,10 +91,11 @@ func HandleExtRemote(req *ipod.Command, tr ipod.CommandWriter, dev DeviceExtRemo
 	case *RetrieveCategorizedDatabaseRecords:
 		ipod.Respond(req, tr, &ReturnCategorizedDatabaseRecord{})
 	case *GetPlayStatus:
+		_, _, playerState := dev.PlaybackStatus()
 		ipod.Respond(req, tr, &ReturnPlayStatus{
 			TrackLength:   300 * 1000,
 			TrackPosition: 20 * 1000,
-			State:         PlayerStatePaused,
+			State:         playerState,
 		})
 	case *GetCurrentPlayingTrackIndex:
 		ipod.Respond(req, tr, &ReturnCurrentPlayingTrackIndex{
@@ -96,15 +103,15 @@ func HandleExtRemote(req *ipod.Command, tr ipod.CommandWriter, dev DeviceExtRemo
 		})
 	case *GetIndexedPlayingTrackTitle:
 		ipod.Respond(req, tr, &ReturnIndexedPlayingTrackTitle{
-			Title: ipod.StringToBytes("title"),
+			Title: ipod.StringToBytes(dev.TrackTitle()),
 		})
 	case *GetIndexedPlayingTrackArtistName:
 		ipod.Respond(req, tr, &ReturnIndexedPlayingTrackArtistName{
-			ArtistName: ipod.StringToBytes("artist"),
+			ArtistName: ipod.StringToBytes(dev.TrackArtist()),
 		})
 	case *GetIndexedPlayingTrackAlbumName:
 		ipod.Respond(req, tr, &ReturnIndexedPlayingTrackAlbumName{
-			AlbumName: ipod.StringToBytes("album"),
+			AlbumName: ipod.StringToBytes(dev.TrackAlbum()),
 		})
 	case *SetPlayStatusChangeNotification:
 		ipod.Respond(req, tr, ackSuccess(req))
@@ -117,12 +124,12 @@ func HandleExtRemote(req *ipod.Command, tr ipod.CommandWriter, dev DeviceExtRemo
 	case *GetTrackArtworkTimes:
 		ipod.Respond(req, tr, &RetTrackArtworkTimes{})
 	case *GetShuffle:
-		ipod.Respond(req, tr, &ReturnShuffle{Mode: ShuffleOff})
+		ipod.Respond(req, tr, &ReturnShuffle{Mode: dev.ShuffleMode()})
 	case *SetShuffle:
 		ipod.Respond(req, tr, ackSuccess(req))
 
 	case *GetRepeat:
-		ipod.Respond(req, tr, &ReturnRepeat{Mode: RepeatOff})
+		ipod.Respond(req, tr, &ReturnRepeat{Mode: dev.RepeatMode()})
 	case *SetRepeat:
 		ipod.Respond(req, tr, ackSuccess(req))
 
