@@ -44,10 +44,28 @@ func (ps *playbackState) PlaybackStatus() (trackLength, trackPos uint32, state e
 	return ps.trackLength, ps.trackPosition, ps.playerState
 }
 
-func (ps *playbackState) SetPlayerState(pState extremote.PlayerState) {
+func (ps *playbackState) SetPlayerStatePlaying() {
 	ps.pbStateMux.Lock()
 	defer ps.pbStateMux.Unlock()
-	ps.playerState = pState
+	ps.playerState = extremote.PlayerStatePlaying
+}
+
+func (ps *playbackState) SetPlayerStatePaused() {
+	ps.pbStateMux.Lock()
+	defer ps.pbStateMux.Unlock()
+	ps.playerState = extremote.PlayerStatePaused
+}
+
+func (ps *playbackState) SetPlayerStateStopped() {
+	ps.pbStateMux.Lock()
+	defer ps.pbStateMux.Unlock()
+	ps.playerState = extremote.PlayerStateStopped
+}
+
+func (ps *playbackState) SetPlayerStateError() {
+	ps.pbStateMux.Lock()
+	defer ps.pbStateMux.Unlock()
+	ps.playerState = extremote.PlayerStateError
 }
 
 func (ps *playbackState) ChapterName() string {
