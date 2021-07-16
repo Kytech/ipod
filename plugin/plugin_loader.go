@@ -3,6 +3,7 @@ package plugin
 import (
 	"plugin"
 
+	"github.com/oandrew/ipod/api"
 	"github.com/oandrew/ipod/state"
 )
 
@@ -15,5 +16,5 @@ func runPlugin(pluginFile string, ipod *state.IpodState) {
 	if err != nil {
 		panic(err)
 	}
-	go pluginMain.(func(interface{}))(ipod)
+	go pluginMain.(func(api.Ipod))(ipod)
 }
