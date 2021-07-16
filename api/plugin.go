@@ -1,5 +1,5 @@
 package api
 
 type Plugin interface {
-	PluginMain(ipodState interface{})
+	PluginMain(ipodState Ipod)
 }
