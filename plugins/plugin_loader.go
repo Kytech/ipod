@@ -1,4 +1,4 @@
-package plugin
+package plugins
 
 import (
 	"plugin"
@@ -6,8 +6,6 @@ import (
 	"github.com/oandrew/ipod/api"
 	"github.com/oandrew/ipod/state"
 )
-
-var pluginRegistry = make(map[string]*api.Plugin)
 
 func runPlugin(pluginFile string, ipod *state.IpodState) {
 	p, err := plugin.Open(pluginFile)
