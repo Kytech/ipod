@@ -12,9 +12,10 @@ func runPlugin(pluginFile string, ipod *state.IpodState) {
 	if err != nil {
 		panic(err)
 	}
-	pluginMain, err := p.Lookup("PluginMain")
+	pluginInfo, err := p.Lookup("IpodPlugin")
 	if err != nil {
 		panic(err)
 	}
-	go pluginMain.(func(api.Ipod))(ipod)
+	plugin := *pluginInfo.(*api.Plugin)
+	go plugin.EntryPoint(ipod)
 }

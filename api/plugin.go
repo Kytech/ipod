@@ -1,5 +1,7 @@
 package api
 
-type Plugin interface {
-	PluginMain(ipodState Ipod)
+type EntryFunction func(Ipod)
+
+type Plugin struct {
+	EntryPoint EntryFunction
 }
