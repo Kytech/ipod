@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"fmt"
 	"plugin"
 
 	"github.com/oandrew/ipod/api"
@@ -16,6 +17,12 @@ func runPlugin(pluginFile string, ipod *state.IpodState) {
 	if err != nil {
 		panic(err)
 	}
-	plugin := *pluginInfo.(*api.Plugin)
+	plugin, ok := pluginInfo.(*api.Plugin)
+	if !ok {
+		panic(PluginError{
+			Message: fmt.Sprintf("Plugin declaration struct IpodPlugin for plugin %s does not exist or is of incorrect type.", pluginFile),
+			Plugin:  "plugin-loader",
+		})
+	}
 	go plugin.EntryPoint(ipod)
 }
