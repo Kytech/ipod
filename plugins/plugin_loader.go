@@ -7,6 +7,8 @@ import (
 	"github.com/oandrew/ipod/state"
 )
 
+var pluginRegistry = make(map[string]*api.Plugin)
+
 func runPlugin(pluginFile string, ipod *state.IpodState) {
 	p, err := plugin.Open(pluginFile)
 	if err != nil {
@@ -23,6 +25,7 @@ func runPlugin(pluginFile string, ipod *state.IpodState) {
 			Plugin:  pluginFile,
 		})
 	}
+	pluginRegistry[plugin.Name] = plugin
 	initFinished := make(chan bool)
 	go plugin.EntryPoint(ipod, initFinished)
 	<-initFinished
