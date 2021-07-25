@@ -1,6 +1,10 @@
 package api
 
-type EntryFunction func(Ipod, chan bool)
+import (
+	"sync"
+)
+
+type EntryFunction func(Ipod, *sync.WaitGroup)
 
 type Plugin struct {
 	Name       string

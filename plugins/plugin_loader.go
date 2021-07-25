@@ -1,30 +1,78 @@
 package plugins
 
 import (
+	"errors"
+	"fmt"
 	"plugin"
+	"sync"
+
+	"io/ioutil"
+	"path/filepath"
 
 	"github.com/oandrew/ipod/api"
 	"github.com/oandrew/ipod/state"
 )
 
-func runPlugin(pluginFile string, ipod *state.IpodState) {
-	p, err := plugin.Open(pluginFile)
+func DiscoverPlugins(pluginDirPath string) error {
+	files, err := ioutil.ReadDir(pluginDirPath)
 	if err != nil {
-		panic(err)
+		return err
+	}
+
+	var pluginLoadErrors []error
+	for _, file := range files {
+		// TODO: Check if file ends in .so
+		err := openPlugin(filepath.Join(pluginDirPath, file.Name()))
+		if err != nil {
+			pluginLoadErrors = append(pluginLoadErrors, err)
+		}
+	}
+
+	if pluginLoadErrors != nil {
+		errMsg := "the following errors occured when loading plugins:"
+
+		for _, pluginErr := range pluginLoadErrors {
+			errMsg += "\n" + pluginErr.Error()
+		}
+
+		return errors.New(errMsg)
+
+	}
+
+	return nil
+}
+
+func openPlugin(pluginFilePath string) error {
+	p, err := plugin.Open(pluginFilePath)
+	if err != nil {
+		return fmt.Errorf("error in plugin %s: %w", pluginFilePath, err)
 	}
 	pluginInfo, err := p.Lookup("IpodPlugin")
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error in plugin %s: %w", pluginFilePath, err)
 	}
 	plugin, ok := pluginInfo.(*api.Plugin)
 	if !ok {
-		panic(PluginError{
-			Message: "Plugin declaration struct \"IpodPlugin\" does not exist or is of incorrect type.",
-			Plugin:  pluginFile,
-		})
+		return fmt.Errorf("error in plugin %s: plugin declaration does not match required fields or is of incorrect struct type", pluginFilePath)
 	}
-	pluginRegistry[plugin.Name] = plugin
-	initFinished := make(chan bool)
-	go plugin.EntryPoint(ipod, initFinished)
-	<-initFinished
+	registerPlugin(plugin)
+	return nil
+}
+
+func InitPlugins(ipod *state.IpodState) {
+	defaultPlugin, plugins := getRegisteredPlugins()
+	if defaultPlugin != nil {
+		var defaultWaitGroup sync.WaitGroup
+		defaultWaitGroup.Add(1)
+		go defaultPlugin.EntryPoint(ipod, &defaultWaitGroup)
+		defaultWaitGroup.Wait()
+	}
+
+	var waitGroup sync.WaitGroup
+	for _, plugin := range plugins {
+		waitGroup.Add(1)
+		go plugin.EntryPoint(ipod, &waitGroup)
+	}
+
+	waitGroup.Wait()
 }
