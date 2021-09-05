@@ -15,7 +15,7 @@ import (
 func LoadPluginsDir(pluginDirPath string) []error {
 	files, err := ioutil.ReadDir(pluginDirPath)
 	if err != nil {
-		return err
+		return []error{err}
 	}
 
 	var pluginLoadErrors []error
