@@ -12,7 +12,7 @@ import (
 	"github.com/oandrew/ipod/state"
 )
 
-func LoadPluginsDir(pluginDirPath string) []error {
+func LoadPluginDir(pluginDirPath string) []error {
 	files, err := ioutil.ReadDir(pluginDirPath)
 	if err != nil {
 		return []error{err}
