@@ -1,7 +1,6 @@
 package plugins
 
 import (
-	"errors"
 	"fmt"
 	"plugin"
 	"sync"
@@ -13,7 +12,7 @@ import (
 	"github.com/oandrew/ipod/state"
 )
 
-func DiscoverPlugins(pluginDirPath string) error {
+func LoadPluginsDir(pluginDirPath string) []error {
 	files, err := ioutil.ReadDir(pluginDirPath)
 	if err != nil {
 		return err
@@ -21,25 +20,15 @@ func DiscoverPlugins(pluginDirPath string) error {
 
 	var pluginLoadErrors []error
 	for _, file := range files {
-		// TODO: Check if file ends in .so
-		err := openPlugin(filepath.Join(pluginDirPath, file.Name()))
-		if err != nil {
-			pluginLoadErrors = append(pluginLoadErrors, err)
+		if !file.IsDir() && filepath.Ext(file.Name()) == ".so" {
+			err := openPlugin(filepath.Join(pluginDirPath, file.Name()))
+			if err != nil {
+				pluginLoadErrors = append(pluginLoadErrors, err)
+			}
 		}
 	}
 
-	if pluginLoadErrors != nil {
-		errMsg := "the following errors occured when loading plugins:"
-
-		for _, pluginErr := range pluginLoadErrors {
-			errMsg += "\n" + pluginErr.Error()
-		}
-
-		return errors.New(errMsg)
-
-	}
-
-	return nil
+	return pluginLoadErrors
 }
 
 func openPlugin(pluginFilePath string) error {
@@ -53,7 +42,7 @@ func openPlugin(pluginFilePath string) error {
 	}
 	plugin, ok := pluginInfo.(*api.Plugin)
 	if !ok {
-		return fmt.Errorf("error in plugin %s: plugin declaration does not match required fields or is of incorrect struct type", pluginFilePath)
+		return fmt.Errorf("error in plugin %s: Plugin declaration does not match required fields or is of incorrect struct type", pluginFilePath)
 	}
 	registerPlugin(plugin)
 	return nil
