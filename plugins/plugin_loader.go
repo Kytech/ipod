@@ -12,6 +12,9 @@ import (
 	"github.com/oandrew/ipod/state"
 )
 
+// Generate imports and registrations for in-tree plugins
+//go:generate go run internal/static_plugin_generator/static_plugin_generator.go
+
 func LoadPluginDir(pluginDirPath string) []error {
 	files, err := ioutil.ReadDir(pluginDirPath)
 	if err != nil {
