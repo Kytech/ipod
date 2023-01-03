@@ -2,30 +2,22 @@ package device
 
 import (
 	"sync"
+	"sync/atomic"
 
 	uberatomic "github.com/oandrew/ipod/device/internal/atomic"
 	extremote "github.com/oandrew/ipod/lingo-extremote"
 )
 
 type devPlaybackStatus struct {
-
 	// Track info
-
-	trTitleMux sync.RWMutex
-	trackTitle string
-
-	trArtistMux sync.RWMutex
-	artistName  string
-
-	trAlbumMux sync.RWMutex
-	albumName  string
+	trackTitle uberatomic.String
+	artistName uberatomic.String
+	albumName  uberatomic.String
 
 	// Playback status
-
-	pbStateMux    sync.RWMutex
-	trackLength   uint32
-	trackPosition uint32
-	playerState   extremote.PlayerState
+	trackLength   atomic.Uint32
+	trackPosition atomic.Uint32
+	playerState   atomic.Uint32
 
 	shModeMux   sync.RWMutex
 	shuffleMode extremote.ShuffleMode
@@ -38,33 +30,23 @@ type devPlaybackStatus struct {
 }
 
 func (ps *devPlaybackStatus) PlaybackStatus() (trackLength, trackPos uint32, state extremote.PlayerState) {
-	ps.pbStateMux.RLock()
-	defer ps.pbStateMux.RUnlock()
-	return ps.trackLength, ps.trackPosition, ps.playerState
+	return ps.trackLength.Load(), ps.trackPosition.Load(), extremote.PlayerState(ps.playerState.Load())
 }
 
 func (ps *devPlaybackStatus) SetPlayerStatePlaying() {
-	ps.pbStateMux.Lock()
-	defer ps.pbStateMux.Unlock()
-	ps.playerState = extremote.PlayerStatePlaying
+	ps.playerState.Store(uint32(extremote.PlayerStatePlaying))
 }
 
 func (ps *devPlaybackStatus) SetPlayerStatePaused() {
-	ps.pbStateMux.Lock()
-	defer ps.pbStateMux.Unlock()
-	ps.playerState = extremote.PlayerStatePaused
+	ps.playerState.Store(uint32(extremote.PlayerStatePaused))
 }
 
 func (ps *devPlaybackStatus) SetPlayerStateStopped() {
-	ps.pbStateMux.Lock()
-	defer ps.pbStateMux.Unlock()
-	ps.playerState = extremote.PlayerStateStopped
+	ps.playerState.Store(uint32(extremote.PlayerStateStopped))
 }
 
 func (ps *devPlaybackStatus) SetPlayerStateError() {
-	ps.pbStateMux.Lock()
-	defer ps.pbStateMux.Unlock()
-	ps.playerState = extremote.PlayerStateError
+	ps.playerState.Store(uint32(extremote.PlayerStateError))
 }
 
 func (ps *devPlaybackStatus) ChapterName() string {
@@ -76,39 +58,27 @@ func (ps *devPlaybackStatus) SetChapterName(chName string) {
 }
 
 func (ps *devPlaybackStatus) TrackTitle() string {
-	ps.trTitleMux.RLock()
-	defer ps.trTitleMux.RUnlock()
-	return ps.trackTitle
+	return ps.trackTitle.Load()
 }
 
 func (ps *devPlaybackStatus) SetTrackTitle(trTitle string) {
-	ps.trTitleMux.Lock()
-	defer ps.trTitleMux.Unlock()
-	ps.trackTitle = trTitle
+	ps.trackTitle.Store(trTitle)
 }
 
 func (ps *devPlaybackStatus) TrackArtist() string {
-	ps.trArtistMux.RLock()
-	defer ps.trArtistMux.RUnlock()
-	return ps.artistName
+	return ps.artistName.Load()
 }
 
 func (ps *devPlaybackStatus) SetTrackArtist(trArtist string) {
-	ps.trArtistMux.Lock()
-	defer ps.trArtistMux.Unlock()
-	ps.artistName = trArtist
+	ps.artistName.Store(trArtist)
 }
 
 func (ps *devPlaybackStatus) TrackAlbum() string {
-	ps.trAlbumMux.RLock()
-	defer ps.trAlbumMux.RUnlock()
-	return ps.albumName
+	return ps.albumName.Load()
 }
 
 func (ps *devPlaybackStatus) SetTrackAlbum(trAlbum string) {
-	ps.trAlbumMux.Lock()
-	defer ps.trAlbumMux.Unlock()
-	ps.albumName = trAlbum
+	ps.albumName.Store(trAlbum)
 }
 
 func (ps *devPlaybackStatus) ShuffleMode() extremote.ShuffleMode {
