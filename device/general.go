@@ -1,10 +1,11 @@
-package state
+package device
 
 import (
 	"bytes"
 	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/sirupsen/logrus"
 
 	"github.com/oandrew/ipod"
 	general "github.com/oandrew/ipod/lingo-general"
@@ -13,6 +14,8 @@ import (
 )
 
 type devGeneral struct {
+	Logger *logrus.Logger
+
 	uimode general.UIMode
 	tokens []general.FIDTokenValue
 }
@@ -129,18 +132,18 @@ func (d *devGeneral) EndIDPS(status general.AccEndIDPSStatus) {
 		}
 
 	}
-	log.Print(buf.String())
+	d.Logger.Print(buf.String())
 }
 
 func (d *devGeneral) AccAuthCert(cert []byte) {
 	pkcs, err := pkcs7.Parse(cert)
 	if err != nil {
-		log.Error(err)
+		d.Logger.Error(err)
 		return
 	}
 	if len(pkcs.Certificates) >= 1 {
 		cn := pkcs.Certificates[0].Subject.CommonName
-		log.Infof("cert: CN=%s", cn)
+		d.Logger.Infof("cert: CN=%s", cn)
 	}
 
 }

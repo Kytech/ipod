@@ -13,21 +13,17 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/oandrew/ipod"
+	"github.com/oandrew/ipod/device"
 	"github.com/oandrew/ipod/hid"
 	audio "github.com/oandrew/ipod/lingo-audio"
 	dispremote "github.com/oandrew/ipod/lingo-dispremote"
 	extremote "github.com/oandrew/ipod/lingo-extremote"
 	general "github.com/oandrew/ipod/lingo-general"
 	_ "github.com/oandrew/ipod/lingo-simpleremote"
-	"github.com/oandrew/ipod/state"
 	"github.com/oandrew/ipod/trace"
 )
 
 var log = logrus.StandardLogger()
-
-func init() {
-	state.SetLogger(log)
-}
 
 func openDevice(path string) (*os.File, error) {
 	f, err := os.OpenFile(path, os.O_RDWR, os.ModePerm)
@@ -388,7 +384,7 @@ func processFrames(frameTransport ipod.FrameReadWriter) {
 	log.Warnf("EOF")
 }
 
-var ipodState = &state.IpodState{}
+var ipodDevice = device.NewVirtualIpodWithLogger(log)
 
 func handlePacket(cmdWriter ipod.CommandWriter, cmd *ipod.Command) {
 	switch cmd.ID.LingoID() {
@@ -398,7 +394,7 @@ func handlePacket(cmdWriter ipod.CommandWriter, cmd *ipod.Command) {
 				audio.Start(cmdWriter)
 			}
 		}
-		general.HandleGeneral(cmd, cmdWriter, ipodState)
+		general.HandleGeneral(cmd, cmdWriter, ipodDevice)
 
 	case ipod.LingoSimpleRemoteID:
 		//todo
@@ -406,7 +402,7 @@ func handlePacket(cmdWriter ipod.CommandWriter, cmd *ipod.Command) {
 	case ipod.LingoDisplayRemoteID:
 		dispremote.HandleDispRemote(cmd, cmdWriter, nil)
 	case ipod.LingoExtRemoteID:
-		extremote.HandleExtRemote(cmd, cmdWriter, ipodState)
+		extremote.HandleExtRemote(cmd, cmdWriter, ipodDevice)
 	case ipod.LingoDigitalAudioID:
 		audio.HandleAudio(cmd, cmdWriter, nil)
 	}
