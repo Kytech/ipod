@@ -5,7 +5,7 @@ import (
 )
 
 type DeviceExtRemote interface {
-	PlaybackStatus() (trackLength, trackPos uint32, state PlayerState)
+	PlaybackStatus() (state PlayerState, trackLength, trackPos uint32)
 	ChapterName() string
 	TrackTitle() string
 	TrackArtist() string
@@ -91,7 +91,7 @@ func HandleExtRemote(req *ipod.Command, tr ipod.CommandWriter, dev DeviceExtRemo
 	case *RetrieveCategorizedDatabaseRecords:
 		ipod.Respond(req, tr, &ReturnCategorizedDatabaseRecord{})
 	case *GetPlayStatus:
-		_, _, playerState := dev.PlaybackStatus()
+		playerState, _, _ := dev.PlaybackStatus()
 		ipod.Respond(req, tr, &ReturnPlayStatus{
 			TrackLength:   300 * 1000,
 			TrackPosition: 20 * 1000,

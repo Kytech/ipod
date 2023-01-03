@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/oandrew/ipod"
+	"github.com/oandrew/ipod/device"
 )
 
 func init() {
@@ -249,7 +250,7 @@ type RetTrackArtworkData struct {
 	Data         []byte
 }
 
-//ack
+// ack
 type ResetDBSelection struct {
 }
 
@@ -289,14 +290,34 @@ type ReturnCategorizedDatabaseRecord struct {
 type GetPlayStatus struct {
 }
 
+// Instead of using an alias, define as a new type to require proper
+// conversion between device-general state codes and what this lingo understands.
+// This is needed since this lingo does not use all player state codes.
+
 type PlayerState byte
 
 const (
-	PlayerStateStopped PlayerState = 0x00
-	PlayerStatePlaying PlayerState = 0x01
-	PlayerStatePaused  PlayerState = 0x02
-	PlayerStateError   PlayerState = 0xff
+	PlayerStateStopped PlayerState = PlayerState(device.PlaybackStopped)
+	PlayerStatePlaying PlayerState = PlayerState(device.PlaybackPlaying)
+	PlayerStatePaused  PlayerState = PlayerState(device.PlaybackPaused)
+	PlayerStateError   PlayerState = PlayerState(device.PlaybackError)
 )
+
+func devicePlaybackToLingoStateCode(pbState device.PlaybackState) PlayerState {
+	switch pbState {
+	case device.PlaybackStopped:
+		return PlayerStateStopped
+	// extremote does not support fastforward and rewind states - show as playing
+	case device.PlaybackPlaying, device.PlaybackFastForwarding, device.PlaybackRewinding:
+		return PlayerStatePlaying
+	case device.PlaybackPaused:
+		return PlayerStatePaused
+	case device.PlaybackError:
+		return PlayerStateError
+	default:
+		return PlayerStateError
+	}
+}
 
 type ReturnPlayStatus struct {
 	TrackLength   uint32
@@ -407,12 +428,16 @@ type RetTrackArtworkTimes struct {
 	// empty for now
 }
 
-type ShuffleMode byte
+// Shuffle modes for this lingo are same as general device states,
+// so just create aliases here for convention where lingos define
+// constants for codes they recognize and use (keeps API more consistent)
+
+type ShuffleMode = device.ShuffleState
 
 const (
-	ShuffleOff    ShuffleMode = 0x00
-	ShuffleTracks ShuffleMode = 0x01
-	ShuffleAlbums ShuffleMode = 0x02
+	ShuffleOff    ShuffleMode = device.ShuffleOff
+	ShuffleTracks ShuffleMode = device.ShuffleTracks
+	ShuffleAlbums ShuffleMode = device.ShuffleAlbums
 )
 
 type GetShuffle struct {
@@ -425,12 +450,15 @@ type SetShuffle struct {
 	//restore on exit
 }
 
-type RepeatMode byte
+// Repeat modes for this lingo are same as general device states;
+// use type aliases to follow convention
+
+type RepeatMode = device.RepeatState
 
 const (
-	RepeatOff RepeatMode = 0x00
-	RepeatOne RepeatMode = 0x01
-	RepeatAll RepeatMode = 0x02
+	RepeatOff RepeatMode = device.RepeatOff
+	RepeatOne RepeatMode = device.RepeatOne
+	RepeatAll RepeatMode = device.RepeatAll
 )
 
 type GetRepeat struct {
