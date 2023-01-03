@@ -11,7 +11,7 @@ import "github.com/sirupsen/logrus"
 // concurrent use.
 type VirtualIpod struct {
 	devGeneral
-	playbackState
+	devPlaybackStatus
 }
 
 // NewVirtualIpod creates a new VirtualIpod with the default logger.

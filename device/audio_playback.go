@@ -3,10 +3,11 @@ package device
 import (
 	"sync"
 
+	uberatomic "github.com/oandrew/ipod/device/internal/atomic"
 	extremote "github.com/oandrew/ipod/lingo-extremote"
 )
 
-type playbackState struct {
+type devPlaybackStatus struct {
 
 	// Track info
 
@@ -33,108 +34,102 @@ type playbackState struct {
 	repeatMode extremote.RepeatMode
 
 	// Track chapters
-
-	chNameMux   sync.RWMutex
-	chapterName string
+	chapterName uberatomic.String
 }
 
-func (ps *playbackState) PlaybackStatus() (trackLength, trackPos uint32, state extremote.PlayerState) {
+func (ps *devPlaybackStatus) PlaybackStatus() (trackLength, trackPos uint32, state extremote.PlayerState) {
 	ps.pbStateMux.RLock()
 	defer ps.pbStateMux.RUnlock()
 	return ps.trackLength, ps.trackPosition, ps.playerState
 }
 
-func (ps *playbackState) SetPlayerStatePlaying() {
+func (ps *devPlaybackStatus) SetPlayerStatePlaying() {
 	ps.pbStateMux.Lock()
 	defer ps.pbStateMux.Unlock()
 	ps.playerState = extremote.PlayerStatePlaying
 }
 
-func (ps *playbackState) SetPlayerStatePaused() {
+func (ps *devPlaybackStatus) SetPlayerStatePaused() {
 	ps.pbStateMux.Lock()
 	defer ps.pbStateMux.Unlock()
 	ps.playerState = extremote.PlayerStatePaused
 }
 
-func (ps *playbackState) SetPlayerStateStopped() {
+func (ps *devPlaybackStatus) SetPlayerStateStopped() {
 	ps.pbStateMux.Lock()
 	defer ps.pbStateMux.Unlock()
 	ps.playerState = extremote.PlayerStateStopped
 }
 
-func (ps *playbackState) SetPlayerStateError() {
+func (ps *devPlaybackStatus) SetPlayerStateError() {
 	ps.pbStateMux.Lock()
 	defer ps.pbStateMux.Unlock()
 	ps.playerState = extremote.PlayerStateError
 }
 
-func (ps *playbackState) ChapterName() string {
-	ps.chNameMux.RLock()
-	defer ps.chNameMux.RUnlock()
-	return ps.chapterName
+func (ps *devPlaybackStatus) ChapterName() string {
+	return ps.chapterName.Load()
 }
 
-func (ps *playbackState) SetChapterName(chName string) {
-	ps.chNameMux.Lock()
-	defer ps.chNameMux.Unlock()
-	ps.chapterName = chName
+func (ps *devPlaybackStatus) SetChapterName(chName string) {
+	ps.chapterName.Store(chName)
 }
 
-func (ps *playbackState) TrackTitle() string {
+func (ps *devPlaybackStatus) TrackTitle() string {
 	ps.trTitleMux.RLock()
 	defer ps.trTitleMux.RUnlock()
 	return ps.trackTitle
 }
 
-func (ps *playbackState) SetTrackTitle(trTitle string) {
+func (ps *devPlaybackStatus) SetTrackTitle(trTitle string) {
 	ps.trTitleMux.Lock()
 	defer ps.trTitleMux.Unlock()
 	ps.trackTitle = trTitle
 }
 
-func (ps *playbackState) TrackArtist() string {
+func (ps *devPlaybackStatus) TrackArtist() string {
 	ps.trArtistMux.RLock()
 	defer ps.trArtistMux.RUnlock()
 	return ps.artistName
 }
 
-func (ps *playbackState) SetTrackArtist(trArtist string) {
+func (ps *devPlaybackStatus) SetTrackArtist(trArtist string) {
 	ps.trArtistMux.Lock()
 	defer ps.trArtistMux.Unlock()
 	ps.artistName = trArtist
 }
 
-func (ps *playbackState) TrackAlbum() string {
+func (ps *devPlaybackStatus) TrackAlbum() string {
 	ps.trAlbumMux.RLock()
 	defer ps.trAlbumMux.RUnlock()
 	return ps.albumName
 }
 
-func (ps *playbackState) SetTrackAlbum(trAlbum string) {
+func (ps *devPlaybackStatus) SetTrackAlbum(trAlbum string) {
 	ps.trAlbumMux.Lock()
 	defer ps.trAlbumMux.Unlock()
 	ps.albumName = trAlbum
 }
 
-func (ps *playbackState) ShuffleMode() extremote.ShuffleMode {
+func (ps *devPlaybackStatus) ShuffleMode() extremote.ShuffleMode {
 	ps.shModeMux.RLock()
 	defer ps.shModeMux.RUnlock()
 	return ps.shuffleMode
 }
 
-func (ps *playbackState) SetShuffleMode(shMode extremote.ShuffleMode) {
+func (ps *devPlaybackStatus) SetShuffleMode(shMode extremote.ShuffleMode) {
 	ps.shModeMux.Lock()
 	defer ps.shModeMux.Unlock()
 	ps.shuffleMode = shMode
 }
 
-func (ps *playbackState) RepeatMode() extremote.RepeatMode {
+func (ps *devPlaybackStatus) RepeatMode() extremote.RepeatMode {
 	ps.rptModeMux.RLock()
 	defer ps.rptModeMux.RUnlock()
 	return ps.repeatMode
 }
 
-func (ps *playbackState) SetRepeatMode(rptMode extremote.RepeatMode) {
+func (ps *devPlaybackStatus) SetRepeatMode(rptMode extremote.RepeatMode) {
 	ps.rptModeMux.Lock()
 	defer ps.rptModeMux.Unlock()
 	ps.repeatMode = rptMode
