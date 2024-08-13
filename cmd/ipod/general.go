@@ -8,8 +8,7 @@ import (
 
 	"github.com/oandrew/ipod"
 	general "github.com/oandrew/ipod/lingo-general"
-
-	"github.com/fullsailor/pkcs7"
+	//"github.com/fullsailor/pkcs7"
 )
 
 type DevGeneral struct {
@@ -139,14 +138,14 @@ func (d *DevGeneral) EndIDPS(status general.AccEndIDPSStatus) {
 }
 
 func (d *DevGeneral) AccAuthCert(cert []byte) {
-	pkcs, err := pkcs7.Parse(cert)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	if len(pkcs.Certificates) >= 1 {
-		cn := pkcs.Certificates[0].Subject.CommonName
-		log.Infof("cert: CN=%s", cn)
-	}
-
+	//	pkcs, err := pkcs7.Parse(cert)
+	//	if err != nil {
+	//		log.Error(err)
+	//		return
+	//	}
+	//	if len(pkcs.Certificates) >= 1 {
+	//		cn := pkcs.Certificates[0].Subject.CommonName
+	//		log.Infof("cert: CN=%s", cn)
+	//	}
+	//
 }
