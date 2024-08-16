@@ -2,6 +2,8 @@ module github.com/oandrew/ipod
 
 go 1.22
 
+replace github.com/davecgh/go-spew => ./internal/go-spew
+
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/sirupsen/logrus v1.4.2
